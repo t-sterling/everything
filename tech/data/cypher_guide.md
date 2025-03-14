@@ -146,32 +146,19 @@ RETURN p
 
 ---
 
-## **8. Cypher vs SQL: Key Differences**  
+## **8. Debugging & Best Practices in Cypher**  
 
-| Feature | Cypher (Graph) | SQL (Relational) |
-|---------|---------------|-----------------|
-| **Data Model** | Graph (Nodes, Relationships) | Tables (Rows, Columns) |
-| **Querying** | Pattern Matching | Joins & Filters |
-| **Relationships** | First-Class Citizens | Foreign Keys |
-| **Traversal** | Graph Algorithms | SQL Queries |
-
-🔗 **More on Graph vs Relational**: [Why Graph Databases?](https://neo4j.com/developer/graph-database/)  
-
----
-
-## **9. Debugging & Best Practices in Cypher**  
-
-### **9.1 Debugging Queries with `EXPLAIN`**  
+### **8.1 Debugging Queries with `EXPLAIN`**  
 ```cypher
 EXPLAIN MATCH (p:Person) RETURN p
 ```
 
-### **9.2 Using `PROFILE` for Execution Plan**  
+### **8.2 Using `PROFILE` for Execution Plan**  
 ```cypher
 PROFILE MATCH (p:Person) RETURN p
 ```
 
-### **9.3 Best Practices for Cypher Queries**  
+### **8.3 Best Practices for Cypher Queries**  
 | Best Practice | Why It Matters |
 |--------------|---------------|
 | **Use Indexes** | Speeds up searches. |
