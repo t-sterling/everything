@@ -29,7 +29,7 @@ GitOps is a **declarative approach to infrastructure and application management*
 ```mermaid
 graph TD;
     Developer -->|Push Config| Git[Git Repository];
-    Git -->|Triggers Sync| GitOpsTool[GitOps Operator (ArgoCD/FluxCD)];
+    Git -->|Triggers Sync| GitOpsTool[GitOps Operator ArgoCD/FluxCD];
     GitOpsTool -->|Applies Changes| Kubernetes[Kubernetes Cluster];
     Kubernetes -->|Observes State| GitOpsTool;
     GitOpsTool -->|Reports Status| Monitoring[Observability & Alerts];
