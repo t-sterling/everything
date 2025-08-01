@@ -23,15 +23,14 @@ A **Data Lake** architecture uses a *centralized repository* (e.g. HDFS or cloud
 
 ```mermaid
 flowchart LR
-    subgraph DataLake["Central Data Lake Storage"]
-      DLS[(Raw data files (any format))]
-    end
-    Sources((Financial Data Sources)) --> DLS
-    DLS ==> BatchProc[Batch Processing Engines<br/>(e.g. Spark, MapReduce)]
-    DLS ==> StreamProc[Streaming Processing Engines<br/>(e.g. Flink)]
-    BatchProc --> AnalyticsOutputs[(Analytics & ML Outputs)]
-    StreamProc --> RealtimeDashboards[(Real-time Dashboards & Alerts)]
+    Sources[Financial Data Sources] --> DLS[Raw Data Storage (e.g. S3, HDFS)]
+    DLS --> BatchProc[Batch Processing Engines (Spark, MapReduce)]
+    DLS --> StreamProc[Streaming Processing Engines (Flink, Kafka Streams)]
+    BatchProc --> Analytics[Analytics & ML Outputs]
+    StreamProc --> Dashboards[Real-time Dashboards]
 ```
+
+
 
 ## Modern Data Warehouse Architecture
 
