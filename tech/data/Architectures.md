@@ -23,11 +23,12 @@ A **Data Lake** architecture uses a *centralized repository* (e.g. HDFS or cloud
 
 ```mermaid
 flowchart LR
-    Sources[Financial Data Sources] --> DLS[Raw Data Storage (e.g. S3, HDFS)]
-    DLS --> BatchProc[Batch Processing Engines (Spark, MapReduce)]
-    DLS --> StreamProc[Streaming Processing Engines (Flink, Kafka Streams)]
-    BatchProc --> Analytics[Analytics & ML Outputs]
-    StreamProc --> Dashboards[Real-time Dashboards]
+    Sources["Financial Data Sources"] --> DLS["Raw Data Storage: S3 or HDFS"]
+    DLS --> BatchProc["Batch Processing: Spark, MapReduce"]
+    DLS --> StreamProc["Streaming Processing: Flink, Kafka Streams"]
+    BatchProc --> Analytics["Analytics & ML Outputs"]
+    StreamProc --> Dashboards["Real-time Dashboards"]
+
 ```
 
 
@@ -48,10 +49,11 @@ A **Data Warehouse** is a *centralized, structured* data repository designed for
 
 ```mermaid
 flowchart LR
-    Sources((Operational Systems<br/>& External Data)) --> ETL[ETL/ELT Processes<br/>(clean & transform)]
-    ETL --> DWH[(Enterprise Data Warehouse)]
-    DWH --> BIReports[BI Reports & Dashboards]
-    DWH --> Analysts[Ad-hoc Analysis (SQL)]
+    Sources["Operational & External Data"] --> ETL["ETL or ELT Processes"]
+    ETL --> DWH["Enterprise Data Warehouse"]
+    DWH --> Reports["BI Reports & Dashboards"]
+    DWH --> Analysts["Ad-hoc SQL Analysis"]
+
 ```
 
 ## Lambda Architecture
@@ -66,12 +68,14 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    DataSource((Live Data Streams<br/>& Historical Data)) -->|batch load| BatchLayer[Batch Processing Layer<br/>(e.g. Spark on Hadoop)]
-    DataSource -->|real-time stream| SpeedLayer[Speed Layer (Streaming)<br/>(e.g. Kafka + Flink)]
-    BatchLayer --> BatchView[(Batch Views (Complete Dataset))]
-    SpeedLayer --> SpeedView[(Real-time Views / Updates)]
-    BatchView & SpeedView --> ServingLayer[Serving Layer (Merge & Query)]
-    ServingLayer --> Consumers[(Applications / Users)]
+    Source["Live and Historical Data"] --> Batch["Batch Layer: Spark/Hadoop"]
+    Source --> Speed["Speed Layer: Kafka + Flink"]
+    Batch --> BatchView["Batch Views"]
+    Speed --> SpeedView["Real-time Views"]
+    BatchView --> Serving["Serving Layer"]
+    SpeedView --> Serving
+    Serving --> Apps["Applications and Queries"]
+
 ```
 
 **Pros (Finance Context):** Lambda architecture’s dual approach provides both **accuracy and low-latency**. This is valuable in finance when you need immediate insights *and* deep historical context. For example, **fraud detection** systems benefit from Lambda – the speed layer can flag anomalous transactions in real-time, while the batch layer can later run comprehensive checks or model retraining on all data to improve accuracy. Similarly, in **portfolio risk management**, a speed layer might provide intraday estimates of risk based on new trades/market moves, and a batch layer can recompute end-of-day risk with full recalculation. Lambda ensures the **most up-to-date view of data** by merging real-time feeds with batch results, which is useful for live dashboards (e.g. a trading desk’s P\&L that reflects both yesterday’s official close and today’s new trades). It also offers fault-tolerance; if the real-time layer fails or lags, the batch layer eventually corrects the output. In summary, Lambda suits scenarios requiring **both real-time insights and historically accurate analysis** – a pattern common in finance (fraud, recommendations, some trading analytics).
@@ -90,12 +94,11 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    Events((Continuous Data Events)) --> Log[(Immutable Event Log<br/>(e.g. Kafka/Pulsar))]
-    Log --> StreamEngine[Streaming Processor<br/>(single pipeline)]
-    StreamEngine --> OutputDB[(Serving Store / View)]
-    OutputDB --> Consumers[(Apps / Analytics)]
-    %% The following dotted line indicates reprocessing using the same stream engine
-    Log -. replay historical .-> StreamEngine
+    Events["Continuous Data Events"] --> Log["Immutable Log: Kafka"]
+    Log --> Processor["Streaming Processor: Flink, Spark"]
+    Processor --> Views["Materialized Views / Output DB"]
+    Views --> Consumers["Apps & Analytics"]
+    Log -.-> Processor
 ```
 
 **Pros (Finance Context):** Kappa’s simplicity addresses many Lambda pain points. There is **no duplicate code or pipeline**, which greatly reduces development and ops overhead. For financial services, this means faster development of streaming applications (fewer components to manage). Kappa inherently provides **low latency** – since everything is a real-time stream, it’s well-suited to **sub-second processing needs** like algorithmic trading analytics, tick-by-tick risk monitoring, or instant fraud scoring. In fact, Kappa is ideal for use cases requiring *millisecond-level* updates (market data processing, electronic trading). For example, a stock trading platform might use a Kappa architecture to ingest market ticks into Kafka and have Flink jobs compute rolling analytics (VWAP, volatility) on the fly for traders; the same pipeline can replay all historical ticks if needed to backfill or recalc analytics, without a separate batch job. Kappa can also handle **event-driven transactional workloads** – e.g. payment processing systems where each event (transaction) triggers downstream actions – because modern streaming platforms (Kafka with exactly-once, Flink with state) can ensure **correctness and ordering** necessary for financial transactions. With exactly-once delivery and strong ordering guarantees, Kappa architectures can meet even core banking requirements for data integrity in streaming pipelines. Another benefit: **scalability and reprocessing** – if a new regulation or model requires re-analyzing two years of trades, one can replay the event log through the same logic, simplifying compliance audits or model backtesting. Overall, Kappa offers a **unified, real-time pipeline** that aligns with the growing need for *instant insights in finance*, from real-time customer analytics to immediate fraud defense.
@@ -114,10 +117,11 @@ The **Data Lakehouse** is a modern architecture that emerged around 2017 to **me
 
 ```mermaid
 flowchart LR
-    SourceData((Batch & Stream Sources)) --> Lakehouse[(Lakehouse Storage<br/>(e.g. Delta/Iceberg on S3))]
-    Lakehouse --> BIUsers[BI & Reporting Tools<br/>(SQL Queries)]
-    Lakehouse --> DataScientists[Data Science & ML<br/>(Notebooks/AI)]
-    Lakehouse --> RealtimeApps[Real-Time Dashboards<br/>(via Streaming Queries)]
+    Sources["Batch & Streaming Data"] --> Lakehouse["Lakehouse Storage: Delta/Iceberg"]
+    Lakehouse --> BI["BI Tools & SQL"]
+    Lakehouse --> ML["Data Science & ML"]
+    Lakehouse --> Realtime["Streaming Dashboards"]
+
 ```
 
 **Pros (Finance Context):** Lakehouse architectures are very attractive to financial organizations because they **break down the historical split** between big data lakes (used by data science teams) and warehouses (used by BI and reporting teams). A lakehouse can **unify analytics and AI on one platform**. For instance, a bank’s risk management group can ingest all trading data to a lakehouse and have quant researchers use the data for machine learning models, while risk managers and regulators use SQL and BI tools on the same data for reports – without duplicating the data into a separate warehouse. Key benefits include **reduced data movement and redundancy**: one copy of data serves multiple purposes. This is cost-efficient and simplifies governance (no more trying to sync a data lake with a separate warehouse, which often leads to errors). The lakehouse’s support for ACID transactions and schema enforcement adds **reliability** needed for finance. It ensures, for example, that when a compliance team queries a transactions table they won’t get partial results from an in-progress write – the query will see a consistent snapshot. Lakehouse formats also track data versioning, which is great for audit and lineage (e.g. you can reproduce last week’s report by querying a snapshot of the data as of that date). In use cases like **regulatory reporting**, where lineage and accuracy are paramount, a lakehouse can meet compliance needs while still storing granular data economically. Lakehouses are also **flexible**: they handle unstructured or semi-structured data (important for areas like fraud analytics that may use call transcripts or emails) in the same repository as structured trades. The **ecosystem of tools** around lakehouse is rich – many analytics tools now directly integrate with formats like Delta/Iceberg, so analysts can use familiar SQL interfaces on data lake storage. For **advanced analytics and AI**, the lakehouse shines as well – data scientists can access raw detailed data to train models, then save feature tables or model outputs back to the lakehouse. In summary, a lakehouse provides **one platform for diverse financial workloads**: streaming analytics (some lakehouse engines allow near-real-time ingestion), BI dashboards, ad-hoc analysis, and machine learning can all operate on a shared, governed data store.
@@ -141,20 +145,23 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph DomainA["Domain A (e.g. Retail Banking)"]
-      A1((Source A systems)) --> A_ETL[Domain A Pipeline]
-      A_ETL --> A_Product[(A Data Product<br/>(e.g. Customer 360 dataset))]
+    subgraph DomainA ["Retail Banking"]
+        A1["Sources"] --> A_Pipeline["ETL / Stream"]
+        A_Pipeline --> A_Product["Customer Data Product"]
     end
-    subgraph DomainB["Domain B (e.g. Fraud)"]
-      B1((Source B systems)) --> B_ETL[Domain B Pipeline]
-      B_ETL --> B_Product[(B Data Product<br/>(e.g. Fraud Alerts stream))]
+    subgraph DomainB ["Fraud"]
+        B1["Sources"] --> B_Pipeline["ETL / Stream"]
+        B_Pipeline --> B_Product["Fraud Events Product"]
     end
-    subgraph DomainC["Domain C (e.g. Compliance)"]
-      C1((Source C systems)) --> C_ETL[Domain C Pipeline]
-      C_ETL --> C_Product[(C Data Product<br/>(e.g. Regulatory Reports))]
+    subgraph DomainC ["Compliance"]
+        C1["Sources"] --> C_Pipeline["ETL / Reports"]
+        C_Pipeline --> C_Product["Regulatory Reports"]
     end
-    A_Product & B_Product & C_Product --> Catalog[(Federated Data Catalog<br/>& Governance Layer)]
-    Catalog --> Consumers[(Enterprise Data Consumers)]
+    A_Product --> Catalog["Data Catalog & Governance"]
+    B_Product --> Catalog
+    C_Product --> Catalog
+    Catalog --> Consumers["Enterprise Consumers"]
+
 ```
 
 **Pros (Finance Context):** Data Mesh can help **large financial organizations** overcome bottlenecks of centralized data teams. By empowering domain-aligned teams (e.g. Loans, Credit Risk, Marketing) to own their pipelines, development can scale and innovate faster – the people with the best knowledge of the data build it, leading to higher quality and usefulness. This approach tackles persistent issues like **data silos and quality**: since each domain is accountable for its data product’s quality (and gets direct feedback from consumers), it can improve issues that central teams often struggle with. In finance, regulatory compliance and reporting can benefit: using a mesh, you can create **domain-specific data products for compliance** that are always up-to-date and owned by the relevant teams. For example, a “Basel III Capital Report” could be a data product owned by the Finance domain – whenever regulators need it, it’s readily available, rather than an ad-hoc project each time. Data mesh fosters better **alignment with business needs** – domain teams focus on delivering data that directly supports business use cases (fraud detection models, personalized offers, etc.), rather than dumping data into a lake and hoping someone finds value. It also can reduce the burden on a central IT team and allow parallel development of pipelines. From a technology view, it often leverages modern distributed tools (cloud, containers, streaming) which can improve *real-time capabilities* and *scalability* for each domain. For instance, a trading desk domain could adopt a streaming pipeline for trades independent of other areas, achieving lower latency than a one-size-fits-all central pipeline. The **federated governance** aspect ensures that despite decentralization, firms can enforce global policies – critical in finance to meet security and privacy regulations. Done well, a data mesh can improve agility while maintaining or even enhancing governance (each domain is responsible, and central oversight exists in a lighter form).
