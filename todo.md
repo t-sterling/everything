@@ -8,6 +8,9 @@ https://www.deeplearning.ai/courses/mathematics-for-machine-learning-and-data-sc
 
 
 -- Data Engineer knowledge:
+https://developer.confluent.io/courses/?course=for-developers#fundamentals
+
+
 - Airflow Udemy
 - Redshift Udemy
 - Snowflake Udemy
