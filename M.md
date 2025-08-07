@@ -1,5 +1,5 @@
 
-```Mermaid
+```mermaid
 graph TD
 
 %% Core Indicators
