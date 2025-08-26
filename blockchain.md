@@ -57,6 +57,7 @@ consensus to maintain a reliable ledger of transactions.
 To illustrate, consider how a Bitcoin transaction gets added to the
 blockchain:
 
+```mermaid
     sequenceDiagram
         participant U as User (Sender)
         participant W as Wallet (Client Software)
@@ -67,6 +68,7 @@ blockchain:
         M->>N: Assemble pending transactions into a new block
         M->>N: Solve proof-of-work and broadcast the new block
         N-->>U: New block is validated and added to the chain, confirming the transaction
+```
 
 In the above sequence, once the miner finds a valid block (in Bitcoin's
 case, by **Proof-of-Work** solving a cryptographic puzzle), that block
