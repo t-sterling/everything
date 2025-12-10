@@ -1,0 +1,589 @@
+{
+  "uid": "hydrator-health-overview",
+  "title": "Hydrator Health Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "style": "dark",
+  "tags": [
+    "hydrator",
+    "mdp",
+    "support",
+    "management"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "entity",
+        "label": "Entity",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "YOUR_PROMETHEUS_UID"
+        },
+        "refresh": 1,
+        "hide": 0,
+        "query": "label_values(mdp_ingest_hydrator_message_total_time_seconds_count, entity)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Hydrator P95 Total Latency (s)",
+      "id": 1,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_message_total_time_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": null
+            },
+            {
+              "color": "yellow",
+              "value": 0.25
+            },
+            {
+              "color": "red",
+              "value": 0.5
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Config Error Rate (5m)",
+      "id": 2,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(hydrator_entity_config_error[5m]) + increase(hydrator_filter_config_error[5m]) + increase(hydrator_rule_config_error[5m]))",
+          "legendFormat": "errors/5m",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": null
+            },
+            {
+              "color": "yellow",
+              "value": 10
+            },
+            {
+              "color": "red",
+              "value": 100
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Messages Processed /s (5m avg)",
+      "id": 3,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
+          "legendFormat": "msg/s",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "red",
+              "value": null
+            },
+            {
+              "color": "yellow",
+              "value": 50
+            },
+            {
+              "color": "green",
+              "value": 100
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Cache P95 Latency (s)",
+      "id": 4,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_cache_put_time_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": null
+            },
+            {
+              "color": "yellow",
+              "value": 0.05
+            },
+            {
+              "color": "red",
+              "value": 0.2
+            }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "table",
+      "title": "Entities – Latency & Errors (last 5m)",
+      "id": 5,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "topk(15, (sum(rate(mdp_ingest_hydrator_message_total_time_seconds_sum[5m])) by (entity)) / (sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m])) by (entity)))",
+          "legendFormat": "{{entity}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(hydrator_entity_config_error[5m])) by (entity)",
+          "legendFormat": "{{entity}} entity_errors",
+          "refId": "B"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.25
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "table",
+      "title": "Config Errors by Type (last 5m)",
+      "id": 6,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(hydrator_entity_config_error[5m]))",
+          "legendFormat": "entity_config_error",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(hydrator_filter_config_error[5m]))",
+          "legendFormat": "filter_config_error",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(increase(hydrator_rule_config_error[5m]))",
+          "legendFormat": "rule_config_error",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "DocDB P95 Latency (s)",
+      "id": 7,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_docdb_time_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Secondary Cache P95 Latency (s)",
+      "id": 8,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_cahe_put2_time_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "table",
+      "title": "SLA Status by Metric",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_message_total_time_seconds_bucket[5m])) by (le))",
+          "legendFormat": "latency_p95",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
+          "legendFormat": "throughput",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(increase(hydrator_entity_config_error[5m]) + increase(hydrator_filter_config_error[5m]) + increase(hydrator_rule_config_error[5m]))",
+          "legendFormat": "errors",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}
