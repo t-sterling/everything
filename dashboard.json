@@ -3,7 +3,7 @@
   "title": "Hydrator Health Overview",
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-1h",
@@ -42,7 +42,7 @@
   "panels": [
     {
       "type": "stat",
-      "title": "Hydrator P95 Total Latency (s)",
+      "title": "Hydrator Avg Total Latency (s, 5m)",
       "id": 1,
       "datasource": {
         "type": "prometheus",
@@ -56,16 +56,14 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_message_total_time_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
+          "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_sum[5m])) / sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
+          "legendFormat": "avg_past_5m",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -77,18 +75,9 @@
         "thresholds": {
           "mode": "absolute",
           "steps": [
-            {
-              "color": "green",
-              "value": null
-            },
-            {
-              "color": "yellow",
-              "value": 0.25
-            },
-            {
-              "color": "red",
-              "value": 0.5
-            }
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.25 },
+            { "color": "red", "value": 0.5 }
           ]
         }
       },
@@ -102,7 +91,7 @@
     },
     {
       "type": "stat",
-      "title": "Config Error Rate (5m)",
+      "title": "Config Error Count (5m)",
       "id": 2,
       "datasource": {
         "type": "prometheus",
@@ -116,16 +105,14 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(hydrator_entity_config_error[5m]) + increase(hydrator_filter_config_error[5m]) + increase(hydrator_rule_config_error[5m]))",
-          "legendFormat": "errors/5m",
+          "expr": "sum(increase(hydrator_entity_config_error_total[5m]) + increase(hydrator_filter_config_error_total[5m]) + increase(hydrator_rule_config_error_total[5m]))",
+          "legendFormat": "errors_5m",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -137,18 +124,9 @@
         "thresholds": {
           "mode": "absolute",
           "steps": [
-            {
-              "color": "green",
-              "value": null
-            },
-            {
-              "color": "yellow",
-              "value": 10
-            },
-            {
-              "color": "red",
-              "value": 100
-            }
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 10 },
+            { "color": "red", "value": 100 }
           ]
         }
       },
@@ -177,15 +155,13 @@
       "targets": [
         {
           "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
-          "legendFormat": "msg/s",
+          "legendFormat": "msg_per_s",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -197,18 +173,9 @@
         "thresholds": {
           "mode": "absolute",
           "steps": [
-            {
-              "color": "red",
-              "value": null
-            },
-            {
-              "color": "yellow",
-              "value": 50
-            },
-            {
-              "color": "green",
-              "value": 100
-            }
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 50 },
+            { "color": "green", "value": 100 }
           ]
         }
       },
@@ -222,7 +189,7 @@
     },
     {
       "type": "stat",
-      "title": "Cache P95 Latency (s)",
+      "title": "Cache Avg Put Latency (s, 5m)",
       "id": 4,
       "datasource": {
         "type": "prometheus",
@@ -236,16 +203,14 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_cache_put_time_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
+          "expr": "sum(rate(mdp_ingest_hydrator_cache_put_time_seconds_sum[5m])) / sum(rate(mdp_ingest_hydrator_cache_put_time_seconds_count[5m]))",
+          "legendFormat": "avg_past_5m",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -257,18 +222,9 @@
         "thresholds": {
           "mode": "absolute",
           "steps": [
-            {
-              "color": "green",
-              "value": null
-            },
-            {
-              "color": "yellow",
-              "value": 0.05
-            },
-            {
-              "color": "red",
-              "value": 0.2
-            }
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.05 },
+            { "color": "red", "value": 0.2 }
           ]
         }
       },
@@ -296,13 +252,13 @@
       },
       "targets": [
         {
-          "expr": "topk(15, (sum(rate(mdp_ingest_hydrator_message_total_time_seconds_sum[5m])) by (entity)) / (sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m])) by (entity)))",
+          "expr": "sum by (entity) (rate(mdp_ingest_hydrator_message_total_time_seconds_sum[5m])) / sum by (entity) (rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
           "legendFormat": "{{entity}}",
           "refId": "A"
         },
         {
-          "expr": "sum(increase(hydrator_entity_config_error[5m])) by (entity)",
-          "legendFormat": "{{entity}} entity_errors",
+          "expr": "sum by (entity) (increase(hydrator_entity_config_error_total[5m]))",
+          "legendFormat": "{{entity}}_errors",
           "refId": "B"
         }
       ],
@@ -333,22 +289,32 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "red", "value": 0.5 }
+            ]
+          },
+          "unit": "s",
+          "decimals": 3
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*errors.*"
+            },
+            "properties": [
               {
-                "color": "green",
-                "value": null
+                "id": "unit",
+                "value": "short"
               },
               {
-                "color": "yellow",
-                "value": 0.25
-              },
-              {
-                "color": "red",
-                "value": 0.5
+                "id": "decimals",
+                "value": 0
               }
             ]
           }
-        },
-        "overrides": []
+        ]
       }
     },
     {
@@ -367,17 +333,17 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(hydrator_entity_config_error[5m]))",
+          "expr": "sum(increase(hydrator_entity_config_error_total[5m]))",
           "legendFormat": "entity_config_error",
           "refId": "A"
         },
         {
-          "expr": "sum(increase(hydrator_filter_config_error[5m]))",
+          "expr": "sum(increase(hydrator_filter_config_error_total[5m]))",
           "legendFormat": "filter_config_error",
           "refId": "B"
         },
         {
-          "expr": "sum(increase(hydrator_rule_config_error[5m]))",
+          "expr": "sum(increase(hydrator_rule_config_error_total[5m]))",
           "legendFormat": "rule_config_error",
           "refId": "C"
         }
@@ -393,18 +359,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 10
-              },
-              {
-                "color": "red",
-                "value": 50
-              }
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
             ]
           }
         },
@@ -413,7 +370,7 @@
     },
     {
       "type": "gauge",
-      "title": "DocDB P95 Latency (s)",
+      "title": "DocDB Avg Latency (s, 5m)",
       "id": 7,
       "datasource": {
         "type": "prometheus",
@@ -427,16 +384,14 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_docdb_time_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
+          "expr": "sum(rate(mdp_ingest_hydrator_docdb_time_seconds_sum[5m])) / sum(rate(mdp_ingest_hydrator_docdb_time_seconds_count[5m]))",
+          "legendFormat": "avg_past_5m",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -451,18 +406,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.05
-              },
-              {
-                "color": "red",
-                "value": 0.2
-              }
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.05 },
+              { "color": "red", "value": 0.2 }
             ]
           }
         },
@@ -471,7 +417,7 @@
     },
     {
       "type": "gauge",
-      "title": "Secondary Cache P95 Latency (s)",
+      "title": "Secondary Cache Avg Put Latency (s, 5m)",
       "id": 8,
       "datasource": {
         "type": "prometheus",
@@ -485,16 +431,14 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_cahe_put2_time_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
+          "expr": "sum(rate(mdp_ingest_hydrator_cahe_put2_time_seconds_sum[5m])) / sum(rate(mdp_ingest_hydrator_cahe_put2_time_seconds_count[5m]))",
+          "legendFormat": "avg_past_5m",
           "refId": "A"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -509,18 +453,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.05
-              },
-              {
-                "color": "red",
-                "value": 0.2
-              }
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.05 },
+              { "color": "red", "value": 0.2 }
             ]
           }
         },
@@ -529,7 +464,7 @@
     },
     {
       "type": "table",
-      "title": "SLA Status by Metric",
+      "title": "SLA Status by Metric (5m window)",
       "id": 9,
       "datasource": {
         "type": "prometheus",
@@ -543,18 +478,18 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(mdp_ingest_hydrator_message_total_time_seconds_bucket[5m])) by (le))",
-          "legendFormat": "latency_p95",
+          "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_sum[5m])) / sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
+          "legendFormat": "latency_avg_s",
           "refId": "A"
         },
         {
           "expr": "sum(rate(mdp_ingest_hydrator_message_total_time_seconds_count[5m]))",
-          "legendFormat": "throughput",
+          "legendFormat": "throughput_msg_per_s",
           "refId": "B"
         },
         {
-          "expr": "sum(increase(hydrator_entity_config_error[5m]) + increase(hydrator_filter_config_error[5m]) + increase(hydrator_rule_config_error[5m]))",
-          "legendFormat": "errors",
+          "expr": "sum(increase(hydrator_entity_config_error_total[5m]) + increase(hydrator_filter_config_error_total[5m]) + increase(hydrator_rule_config_error_total[5m]))",
+          "legendFormat": "config_errors_5m",
           "refId": "C"
         }
       ],
@@ -567,22 +502,44 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.5
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 1 }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*latency.*"
+            },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              { "id": "decimals", "value": 3 }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*throughput.*"
+            },
+            "properties": [
+              { "id": "unit", "value": "ops" },
+              { "id": "decimals", "value": 1 }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*errors.*"
+            },
+            "properties": [
+              { "id": "unit", "value": "short" },
+              { "id": "decimals", "value": 0 }
+            ]
+          }
+        ]
       }
     }
   ]
