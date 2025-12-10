@@ -1,0 +1,410 @@
+{
+  "uid": "kafka-client-health-overview",
+  "title": "Kafka Client Health Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "style": "dark",
+  "tags": ["kafka", "spring-boot", "support", "management"],
+  "templating": {
+    "list": [
+      {
+        "name": "job",
+        "label": "Job (service)",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "YOUR_PROMETHEUS_UID"
+        },
+        "refresh": 1,
+        "hide": 0,
+        "query": "label_values(kafka_producer_record_send_total, job)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Producer Send Rate (msg/s, 5m)",
+      "id": 1,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_producer_record_send_total{job=~\"$job\"}[5m]))",
+          "legendFormat": "send_rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 100 },
+            { "color": "green", "value": 500 }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1 },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Producer Error Rate (msg/s, 5m)",
+      "id": 2,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_producer_record_error_total{job=~\"$job\"}[5m]))",
+          "legendFormat": "error_rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.1 },
+            { "color": "red", "value": 1 }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 3 },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Consumer Records Rate (msg/s, 5m)",
+      "id": 3,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_consumer_records_consumed_total{job=~\"$job\"}[5m]))",
+          "legendFormat": "consumed_rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 100 },
+            { "color": "green", "value": 500 }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1 },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Consumer Bytes Rate (bytes/s, 5m)",
+      "id": 4,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_consumer_bytes_consumed_total{job=~\"$job\"}[5m]))",
+          "legendFormat": "bytes_rate",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 1048576 },
+            { "color": "green", "value": 5242880 }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "Bps", "decimals": 1 },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Producer Send Rate by Topic",
+      "id": 5,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_producer_record_send_total{job=~\"$job\"}[5m])) by (topic)",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1 },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Records Rate by Topic",
+      "id": 6,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_consumer_records_consumed_total{job=~\"$job\"}[5m])) by (topic)",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 1 },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Producer Request Latency (avg)",
+      "id": 7,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "targets": [
+        {
+          "expr": "avg(kafka_producer_request_latency_avg{job=~\"$job\"}) by (client_id)",
+          "legendFormat": "{{client_id}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "decimals": 1 },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Fetch Latency (avg)",
+      "id": 8,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "targets": [
+        {
+          "expr": "avg(kafka_consumer_fetch_latency_avg{job=~\"$job\"}) by (client_id)",
+          "legendFormat": "{{client_id}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "decimals": 1 },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Active Admin Connections",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 21 },
+      "targets": [
+        {
+          "expr": "sum(kafka_admin_client_connection_count{job=~\"$job\"})",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Connection Error Rate (5m)",
+      "id": 10,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 21 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_admin_client_failed_authentication_total{job=~\"$job\"}[5m]))",
+          "legendFormat": "failed_auth",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.01 },
+            { "color": "red", "value": 0.1 }
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "decimals": 3 },
+        "overrides": []
+      }
+    },
+    {
+      "type": "table",
+      "title": "Per-Topic Producer/Consumer Summary (5m)",
+      "id": 11,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "YOUR_PROMETHEUS_UID"
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 21 },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_producer_record_send_total{job=~\"$job\"}[5m])) by (topic)",
+          "legendFormat": "{{topic}}_send",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(kafka_consumer_records_consumed_total{job=~\"$job\"}[5m])) by (topic)",
+          "legendFormat": "{{topic}}_consumed",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(kafka_producer_record_error_total{job=~\"$job\"}[5m])) by (topic)",
+          "legendFormat": "{{topic}}_errors",
+          "refId": "C"
+        }
+      ],
+      "transformations": [
+        { "id": "merge", "options": {} }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          { "displayName": "Value", "desc": true }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 2,
+          "custom": { "align": "auto" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byRegexp", "options": ".*errors.*" },
+            "properties": [
+              { "id": "decimals", "value": 3 }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
