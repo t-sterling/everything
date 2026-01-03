@@ -20,6 +20,7 @@ Imagine an e-commerce system that adopts event sourcing and CQRS. It has separat
 
 To better illustrate the flow, consider the sequence diagram below showing how a new order travels through the system, and how the read model gets updated:
 
+```mermaid
 sequenceDiagram
     participant User
     participant OrderService as Order Service (Command)
@@ -36,6 +37,7 @@ sequenceDiagram
     User->>Query Service: Query Order Status
     Query Service->>StateStore: Reads Order + Customer + Payment info
     Query Service-->>User: Returns enriched Order status
+```
 
 Event Flow Explanation: When the Order Service handles a “place order” request, it emits an OrderCreated event to Kafka (rather than directly writing to an Orders DB). The Kafka Streams application in the Query Service consumes that event from the orders topic. It updates its local state store (which holds the latest state of all orders in a KTable) with the new order’s details. Because this Query Service also has the latest customer data in another state store (populated from the customers topic), it can enrich the order’s state with the customer’s info (e.g. name, contact) by performing a join between the Order event and the Customer KTable. Similarly, when a PaymentReceived event arrives on the payments topic for that order, the Query Service updates the payment status in the order’s state (or in a separate payment state store that is joined with orders). The result is that the Query Service’s materialized view always reflects the current state of each order (e.g., Order #123: created by Alice, amount $50, PAID, shipping pending). A client can query this service (through an API) to get the latest order status without the service having to go to multiple databases – it’s all in the local state, updated in real-time by Kafka Streams.
 
