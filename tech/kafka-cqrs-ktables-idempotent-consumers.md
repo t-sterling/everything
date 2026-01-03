@@ -113,6 +113,8 @@ if (!processedIds.contains(eventId)) {
     markAsProcessed(eventId);    // e.g., insert into DB or in-memory set
 }
 kafkaConsumer.commitSync(record.offset()); // commit offset after successful processing
+```
+
 Here, we only process the event if we haven’t seen its ID before. The markAsProcessed could insert into a relational DB table with primary key = eventId (which fails on duplicate, as described)[51], or update an internal state store for tracking. This way, if the consumer crashes after processing but before the commit, it will retry the event, but then notice the ID was already handled and safely skip the duplicate on the second pass.
 Kafka’s strong ordering guarantees per partition also help with idempotence. If related events are keyed to the same partition (e.g., all events for Order 123 go to partition 5), they will be processed in order. This means if we have a scheme to detect duplicates using the last seen offset or a status flag, we won’t get out-of-order duplicates for the same key[52]. Ensuring a proper key choice (like customer ID or order ID) for partitioning is important for both ordering and stateful processing.
 In conclusion, making consumers idempotent involves a combination of Kafka features (idempotent producers, transactions, read_committed consumers) and application design patterns (deduplication tables, idempotent updates). Our fictional system benefits from Kafka Streams’ exactly-once processing to handle much of this automatically. But as a rule of thumb, every consumer that performs external actions or updates shared state should assume an event might be repeated and code defensively to handle it[39][53]. By doing so, we ensure that even if Kafka delivers something twice, our outcome remains correct once.
